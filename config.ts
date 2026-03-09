@@ -35,10 +35,17 @@ export type PowerMemConfig = {
   pmemPath?: string;
   userId?: string;
   agentId?: string;
+  /** Max memories to return in recall / inject in auto-recall. Default 5. */
+  recallLimit?: number;
+  /** Min score (0–1) for recall; memories below are filtered. Default 0. */
+  recallScoreThreshold?: number;
   autoCapture: boolean;
   autoRecall: boolean;
   inferOnAdd: boolean;
 };
+
+const DEFAULT_RECALL_LIMIT = 5;
+const DEFAULT_RECALL_SCORE_THRESHOLD = 0;
 
 const ALLOWED_KEYS = [
   "mode",
@@ -48,6 +55,8 @@ const ALLOWED_KEYS = [
   "pmemPath",
   "userId",
   "agentId",
+  "recallLimit",
+  "recallScoreThreshold",
   "autoCapture",
   "autoRecall",
   "inferOnAdd",
@@ -105,12 +114,36 @@ export const powerMemConfigSchema = {
         typeof cfg.agentId === "string" && cfg.agentId.trim()
           ? cfg.agentId.trim()
           : undefined,
+      recallLimit: toRecallLimit(cfg.recallLimit),
+      recallScoreThreshold: toRecallScoreThreshold(cfg.recallScoreThreshold),
       autoCapture: cfg.autoCapture !== false,
       autoRecall: cfg.autoRecall !== false,
       inferOnAdd: cfg.inferOnAdd !== false,
     };
   },
 };
+
+function toRecallLimit(v: unknown): number {
+  if (typeof v === "number" && Number.isFinite(v) && v >= 1) {
+    return Math.min(100, Math.floor(v));
+  }
+  if (typeof v === "string" && /^\d+$/.test(v)) {
+    const n = parseInt(v, 10);
+    return n >= 1 ? Math.min(100, n) : DEFAULT_RECALL_LIMIT;
+  }
+  return DEFAULT_RECALL_LIMIT;
+}
+
+function toRecallScoreThreshold(v: unknown): number {
+  if (typeof v === "number" && Number.isFinite(v)) {
+    return Math.max(0, Math.min(1, v));
+  }
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    if (Number.isFinite(n)) return Math.max(0, Math.min(1, n));
+  }
+  return DEFAULT_RECALL_SCORE_THRESHOLD;
+}
 
 /** Default user/agent IDs when not configured (single-tenant style). */
 export const DEFAULT_USER_ID = "openclaw-user";
