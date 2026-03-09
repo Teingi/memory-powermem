@@ -1,14 +1,14 @@
-# Moltbot Memory (PowerMem) Plugin
+# OpenClaw Memory (PowerMem) Plugin
 
-This plugin lets [Moltbot](https://github.com/moltbot/moltbot) use long-term memory via the [PowerMem](https://github.com/oceanbase/powermem) HTTP API: intelligent extraction, Ebbinghaus forgetting curve, multi-agent isolation. **No Python inside Moltbot**—only a separately running PowerMem server is required.
+This plugin lets [OpenClaw](https://github.com/openclaw/openclaw) use long-term memory via the [PowerMem](https://github.com/oceanbase/powermem) HTTP API: intelligent extraction, Ebbinghaus forgetting curve, multi-agent isolation. **No Python inside OpenClaw**—only a separately running PowerMem server is required.
 
-Follow the steps in order: install and start PowerMem, then install the plugin, configure Moltbot, and verify.
+Follow the steps in order: install and start PowerMem, then install the plugin, configure OpenClaw, and verify.
 
 ---
 
 ## Prerequisites
 
-- **Moltbot** installed (CLI + gateway working)
+- **OpenClaw** installed (CLI + gateway working)
 - **PowerMem server**: install and run it separately (choose one of the two methods below)
 - For PowerMem’s “intelligent extraction”: configure LLM + Embedding API keys in PowerMem’s `.env` (e.g. Qwen / OpenAI)
 
@@ -121,25 +121,25 @@ JSON response means the server is up. API docs: `http://localhost:8000/docs`.
 
 ---
 
-## Step 2: Install the plugin into Moltbot
+## Step 2: Install the plugin into OpenClaw
 
 On your machine (use your actual plugin path):
 
 ```bash
 # Install from a local directory (e.g. cloned repo)
-moltbot plugins install /path/to/moltbot-extension-powermem
+openclaw plugins install /path/to/openclaw-extension-powermem
 
 # For development (symlink, no copy)
-moltbot plugins install -l /path/to/moltbot-extension-powermem
+openclaw plugins install -l /path/to/openclaw-extension-powermem
 ```
 
-After install, run `moltbot plugins list` and confirm `memory-powermem` is listed.
+After install, run `openclaw plugins list` and confirm `memory-powermem` is listed.
 
 ---
 
-## Step 3: Configure Moltbot to use the plugin
+## Step 3: Configure OpenClaw to use the plugin
 
-Edit Moltbot’s config (e.g. `~/.clawdbot/config.json` or project `moltbot.json`). Add or merge a top-level `plugins` section, set the memory slot to this plugin, and set the PowerMem URL.
+Edit OpenClaw’s config (e.g. `~/.openclaw/openclaw.json). Add or merge `plugins.slots.memory` and `plugins.entries["memory-powermem"]`, and set the PowerMem URL.
 
 **Example (JSON):**
 
@@ -166,7 +166,7 @@ Notes:
 
 - `baseUrl`: PowerMem HTTP base URL **without** `/api/v1`, e.g. `http://localhost:8000` or your host/port.
 - If PowerMem has API key auth, add `"apiKey": "your-key"` under `config`.
-- **Restart the Moltbot gateway** (or Mac menubar app) after changing config.
+- **Restart the OpenClaw gateway** (or Mac menubar app) after changing config.
 
 ---
 
@@ -176,7 +176,7 @@ In a terminal:
 
 ```bash
 # Check PowerMem reachability
-moltbot ltm health
+openclaw ltm health
 ```
 
 If there are no errors and you see a healthy status, the plugin is talking to PowerMem.
@@ -185,13 +185,13 @@ Then try a manual add and search:
 
 ```bash
 # Add a memory
-moltbot ltm add "I prefer a cup of Americano every morning"
+openclaw ltm add "I prefer a cup of Americano every morning"
 
 # Search by content
-moltbot ltm search "coffee"
+openclaw ltm search "coffee"
 ```
 
-If search returns the line you added (or similar), the full flow (PowerMem → plugin → Moltbot) is working.
+If search returns the line you added (or similar), the full flow (PowerMem → plugin → OpenClaw) is working.
 
 ---
 
@@ -201,8 +201,8 @@ If search returns the line you added (or similar), the full flow (PowerMem → p
 |---------------|----------|-------------|
 | `baseUrl`     | Yes      | PowerMem API base URL, e.g. `http://localhost:8000`, no `/api/v1` suffix. |
 | `apiKey`      | No       | Set when PowerMem server has API key authentication enabled. |
-| `userId`      | No       | PowerMem `user_id` for isolation; default `moltbot-user`. |
-| `agentId`     | No       | PowerMem `agent_id` for isolation; default `moltbot-agent`. |
+| `userId`      | No       | PowerMem `user_id` for isolation; default `openclaw-user`. |
+| `agentId`     | No       | PowerMem `agent_id` for isolation; default `openclaw-agent`. |
 | `autoCapture` | No       | Auto-store from conversations after agent ends; default `true`. |
 | `autoRecall`  | No       | Auto-inject relevant memories before agent starts; default `true`. |
 | `inferOnAdd`  | No       | Use PowerMem intelligent extraction when adding; default `true`. |
@@ -213,7 +213,7 @@ If search returns the line you added (or similar), the full flow (PowerMem → p
 
 ## Agent tools
 
-Exposed to Moltbot agents:
+Exposed to OpenClaw agents:
 
 - **memory_recall** — Search long-term memories by query.
 - **memory_store** — Save information (with optional infer).
@@ -221,38 +221,38 @@ Exposed to Moltbot agents:
 
 ---
 
-## Moltbot CLI (when plugin enabled)
+## OpenClaw CLI (when plugin enabled)
 
-- `moltbot ltm search <query> [--limit n]` — Search memories.
-- `moltbot ltm health` — Check PowerMem server health.
-- `moltbot ltm add "<text>"` — Manually store one memory.
+- `openclaw ltm search <query> [--limit n]` — Search memories.
+- `openclaw ltm health` — Check PowerMem server health.
+- `openclaw ltm add "<text>"` — Manually store one memory.
 
 ---
 
 ## Troubleshooting
 
-**1. `moltbot ltm health` fails or cannot connect**
+**1. `openclaw ltm health` fails or cannot connect**
 
 - Ensure PowerMem is running (Option A terminal still open, or Docker container up).
 - Ensure `baseUrl` matches the real address (use `http://localhost:8000` for local).
-- If Moltbot and PowerMem are on different machines, use PowerMem’s host IP or hostname instead of `localhost`.
+- If OpenClaw and PowerMem are on different machines, use PowerMem’s host IP or hostname instead of `localhost`.
 
 **2. Add/search returns nothing or 500**
 
 - Check PowerMem terminal or Docker logs; often LLM/Embedding not configured or wrong API key.
 - Ensure `LLM_API_KEY` and `EMBEDDING_API_KEY` in `.env` are set and valid.
 
-**3. Plugin installed but Moltbot not using memory**
+**3. Plugin installed but OpenClaw not using memory**
 
 - Confirm `plugins.slots.memory` is `memory-powermem` and `plugins.entries["memory-powermem"].enabled` is `true`.
-- Restart the gateway (or Moltbot app) after config changes.
+- Restart the gateway (or OpenClaw app) after config changes.
 
 ---
 
 ## Repository development
 
 ```bash
-cd /path/to/moltbot-extension-powermem
+cd /path/to/openclaw-extension-powermem
 pnpm install
 pnpm lint   # type-check
 pnpm test   # run tests (if any)

@@ -70,8 +70,8 @@ export class PowerMemClient {
   constructor(options: PowerMemClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.apiKey = options.apiKey;
-    this.userId = options.userId ?? "moltbot-user";
-    this.agentId = options.agentId ?? "moltbot-agent";
+    this.userId = options.userId ?? "openclaw-user";
+    this.agentId = options.agentId ?? "openclaw-agent";
   }
 
   static fromConfig(cfg: PowerMemConfig, userId: string, agentId: string): PowerMemClient {

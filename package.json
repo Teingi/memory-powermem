@@ -1,7 +1,7 @@
 {
-  "name": "moltbot-extension-powermem",
+  "name": "openclaw-extension-powermem",
   "version": "1.0.0",
-  "description": "Moltbot plugin: long-term memory via PowerMem HTTP API (intelligent extraction, Ebbinghaus forgetting curve).",
+  "description": "OpenClaw plugin: long-term memory via PowerMem HTTP API (intelligent extraction, Ebbinghaus forgetting curve).",
   "type": "module",
   "main": "index.ts",
   "exports": {
@@ -11,7 +11,7 @@
     "index.ts",
     "config.ts",
     "client.ts",
-    "moltbot.plugin.json"
+    "openclaw.plugin.json"
   ],
   "scripts": {
     "test": "vitest run",
@@ -25,12 +25,12 @@
     "vitest": "^2.0.0"
   },
   "peerDependencies": {
-    "moltbot": ">=2026.1.0"
+    "openclaw": ">=2026.1.0"
   },
   "peerDependenciesMeta": {
-    "moltbot": { "optional": true }
+    "openclaw": { "optional": true }
   },
-  "moltbot": {
+  "openclaw": {
     "extensions": ["./index.ts"]
   },
   "repository": "",

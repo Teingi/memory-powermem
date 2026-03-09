@@ -1,6 +1,6 @@
-# Moltbot Memory (PowerMem) 插件
+# OpenClaw Memory (PowerMem) 插件
 
-本插件让 [Moltbot](https://github.com/moltbot/moltbot) 通过 [PowerMem](https://github.com/oceanbase/powermem) 的 HTTP API 使用长期记忆：智能抽取、艾宾浩斯遗忘曲线、多 Agent 隔离。**Moltbot 里不跑 Python**，只需一个单独运行的 PowerMem 服务。
+本插件让 [OpenClaw](https://github.com/openclaw/openclaw) 通过 [PowerMem](https://github.com/oceanbase/powermem) 的 HTTP API 使用长期记忆：智能抽取、艾宾浩斯遗忘曲线、多 Agent 隔离。**OpenClaw 里不跑 Python**，只需一个单独运行的 PowerMem 服务。
 
 下面按顺序做即可：先装 PowerMem 并启动服务，再装插件、改配置，最后验证。
 
@@ -8,7 +8,7 @@
 
 ## 前置条件
 
-- 已安装 **Moltbot**（CLI + gateway 能正常用）
+- 已安装 **OpenClaw**（CLI + gateway 能正常用）
 - **PowerMem 服务**：需要单独安装并启动（见下文两种方式，任选其一）
 - 若用 PowerMem 的「智能抽取」：需在 PowerMem 的 `.env` 里配置好 LLM + Embedding 的 API Key（如通义千问 / OpenAI）
 
@@ -121,25 +121,25 @@ curl -s http://localhost:8000/api/v1/system/health
 
 ---
 
-## 第二步：把本插件装进 Moltbot
+## 第二步：把本插件装进 OpenClaw
 
 在**你本机**执行（路径改成你实际克隆的目录）：
 
 ```bash
 # 若插件在本机目录（例如克隆下来的）
-moltbot plugins install /path/to/moltbot-extension-powermem
+openclaw plugins install /path/to/openclaw-extension-powermem
 
 # 开发时想改代码即生效，可用链接方式（不拷贝）
-moltbot plugins install -l /path/to/moltbot-extension-powermem
+openclaw plugins install -l /path/to/openclaw-extension-powermem
 ```
 
-安装成功后，可用 `moltbot plugins list` 确认能看到 `memory-powermem`。
+安装成功后，可用 `openclaw plugins list` 确认能看到 `memory-powermem`。
 
 ---
 
-## 第三步：配置 Moltbot 使用本插件
+## 第三步：配置 OpenClaw 使用本插件
 
-编辑 Moltbot 的配置文件（常见位置：`~/.clawdbot/config.json` 或项目里的 `moltbot.json`），在 **根级** 增加或合并 `plugins` 段，并把记忆槽指向本插件，并写上 PowerMem 的地址。
+编辑 OpenClaw 的配置文件（常见位置：`~/.openclaw/openclaw.json`），在 **根级** 增加或合并 `plugins` 段，并把记忆槽指向本插件，并写上 PowerMem 的地址。
 
 **示例（JSON）：**
 
@@ -166,7 +166,7 @@ moltbot plugins install -l /path/to/moltbot-extension-powermem
 
 - `baseUrl`：PowerMem 的 HTTP 地址，**不要**加 `/api/v1`，就写 `http://localhost:8000` 或你的实际主机/端口。
 - 若 PowerMem 开了 API Key 鉴权，在 `config` 里增加 `"apiKey": "你的key"`。
-- 改完配置后**重启 Moltbot gateway**（或重启 Mac 菜单栏应用），配置才会生效。
+- 改完配置后**重启 OpenClaw gateway**（或重启 Mac 菜单栏应用），配置才会生效。
 
 ---
 
@@ -176,7 +176,7 @@ moltbot plugins install -l /path/to/moltbot-extension-powermem
 
 ```bash
 # 检查 PowerMem 服务是否可达
-moltbot ltm health
+openclaw ltm health
 ```
 
 若输出里没有报错、能看到健康状态，说明插件已连上 PowerMem。
@@ -185,13 +185,13 @@ moltbot ltm health
 
 ```bash
 # 写入一条记忆
-moltbot ltm add "我的偏好是每天早上喝一杯美式咖啡"
+openclaw ltm add "我的偏好是每天早上喝一杯美式咖啡"
 
 # 按内容搜索
-moltbot ltm search "咖啡"
+openclaw ltm search "咖啡"
 ```
 
-若搜索能返回刚写的那条（或类似内容），说明「安装 PowerMem → 安装插件 → 配置 Moltbot」全流程已打通。
+若搜索能返回刚写的那条（或类似内容），说明「安装 PowerMem → 安装插件 → 配置 OpenClaw」全流程已打通。
 
 ---
 
@@ -201,8 +201,8 @@ moltbot ltm search "咖啡"
 |---------------|------|------|
 | `baseUrl`     | 是   | PowerMem API 根地址，如 `http://localhost:8000`，不要带 `/api/v1`。 |
 | `apiKey`      | 否   | PowerMem 开启 API Key 鉴权时填写。 |
-| `userId`      | 否   | 用于多用户隔离，默认 `moltbot-user`。 |
-| `agentId`     | 否   | 用于多 Agent 隔离，默认 `moltbot-agent`。 |
+| `userId`      | 否   | 用于多用户隔离，默认 `openclaw-user`。 |
+| `agentId`     | 否   | 用于多 Agent 隔离，默认 `openclaw-agent`。 |
 | `autoCapture` | 否   | 会话结束后是否自动把对话交给 PowerMem 抽取记忆，默认 `true`。 |
 | `autoRecall`  | 否   | 会话开始前是否自动注入相关记忆，默认 `true`。 |
 | `inferOnAdd`  | 否   | 写入时是否用 PowerMem 智能抽取，默认 `true`。 |
@@ -213,7 +213,7 @@ moltbot ltm search "咖啡"
 
 ## Agent 内工具
 
-在 Moltbot Agent 里会暴露这些能力：
+在 OpenClaw Agent 里会暴露这些能力：
 
 - **memory_recall** — 按查询搜索长期记忆
 - **memory_store** — 写入一条记忆（可选是否智能抽取）
@@ -221,38 +221,38 @@ moltbot ltm search "咖啡"
 
 ---
 
-## Moltbot CLI 命令（插件启用后）
+## OpenClaw CLI 命令（插件启用后）
 
-- `moltbot ltm search <query> [--limit n]` — 搜索记忆
-- `moltbot ltm health` — 检查 PowerMem 服务健康
-- `moltbot ltm add "<text>"` — 手动写入一条记忆
+- `openclaw ltm search <query> [--limit n]` — 搜索记忆
+- `openclaw ltm health` — 检查 PowerMem 服务健康
+- `openclaw ltm add "<text>"` — 手动写入一条记忆
 
 ---
 
 ## 常见问题
 
-**1. `moltbot ltm health` 报错连不上**
+**1. `openclaw ltm health` 报错连不上**
 
 - 确认 PowerMem 已启动（方式 A 的终端还在跑，或 Docker 容器在运行）。
 - 确认 `baseUrl` 与真实地址一致（本机用 `http://localhost:8000`，别写 `127.0.0.1` 除非你确定一致）。
-- 若 Moltbot 和 PowerMem 不在同一台机器，把 `localhost` 改成 PowerMem 所在机器的 IP 或域名。
+- 若 OpenClaw 和 PowerMem 不在同一台机器，把 `localhost` 改成 PowerMem 所在机器的 IP 或域名。
 
 **2. 写入/搜索没反应或报 500**
 
 - 看 PowerMem 终端或 Docker 日志，多半是 LLM/Embedding 未配置或 API Key 错误。
 - 确保 `.env` 里 `LLM_API_KEY`、`EMBEDDING_API_KEY` 已填且有效。
 
-**3. 插件已安装但 Moltbot 没用上记忆**
+**3. 插件已安装但 OpenClaw 没用上记忆**
 
 - 确认配置里 `plugins.slots.memory` 为 `memory-powermem`，且 `plugins.entries["memory-powermem"].enabled` 为 `true`。
-- 改完配置后必须重启 gateway（或 Moltbot 应用）。
+- 改完配置后必须重启 gateway（或 OpenClaw 应用）。
 
 ---
 
 ## 本仓库开发命令
 
 ```bash
-cd /path/to/moltbot-extension-powermem
+cd /path/to/openclaw-extension-powermem
 pnpm install
 pnpm lint   # 类型检查
 pnpm test   # 运行测试（若有）

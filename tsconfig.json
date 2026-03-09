@@ -11,6 +11,6 @@
     "isolatedModules": true,
     "types": ["vitest/globals"]
   },
-  "include": ["*.ts", "*.test.ts", "types/**/*.d.ts"],
+  "include": ["*.ts", "*.test.ts"],
   "exclude": ["node_modules"]
 }

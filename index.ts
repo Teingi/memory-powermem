@@ -1,5 +1,5 @@
 /**
- * Moltbot Memory (PowerMem) Plugin
+ * OpenClaw Memory (PowerMem) Plugin
  *
  * Long-term memory via PowerMem HTTP API: intelligent extraction,
  * Ebbinghaus forgetting curve, multi-agent isolation. Requires a running
@@ -7,7 +7,7 @@
  */
 
 import { Type } from "@sinclair/typebox";
-import type { MoltbotPluginApi } from "clawdbot/plugin-sdk";
+import type { OpenClawPluginApi } from "openclaw/plugin-sdk/memory-core";
 
 import {
   powerMemConfigSchema,
@@ -29,13 +29,13 @@ const memoryPlugin = {
   kind: "memory" as const,
   configSchema: powerMemConfigSchema,
 
-  register(api: MoltbotPluginApi) {
+  register(api: OpenClawPluginApi) {
     const cfg = powerMemConfigSchema.parse(api.pluginConfig) as PowerMemConfig;
     const userId = resolveUserId(cfg);
     const agentId = resolveAgentId(cfg);
     const client = PowerMemClient.fromConfig(cfg, userId, agentId);
 
-    api.logger?.info?.(
+    api.logger.info(
       `memory-powermem: plugin registered (baseUrl: ${cfg.baseUrl}, user: ${userId}, agent: ${agentId})`,
     );
 
@@ -86,7 +86,7 @@ const memoryPlugin = {
               details: { count: results.length, memories: sanitizedResults },
             };
           } catch (err) {
-            api.logger?.warn?.(`memory-powermem: recall failed: ${String(err)}`);
+            api.logger.warn(`memory-powermem: recall failed: ${String(err)}`);
             return {
               content: [
                 {
@@ -148,7 +148,7 @@ const memoryPlugin = {
               },
             };
           } catch (err) {
-            api.logger?.warn?.(`memory-powermem: store failed: ${String(err)}`);
+            api.logger.warn(`memory-powermem: store failed: ${String(err)}`);
             return {
               content: [
                 {
@@ -234,7 +234,7 @@ const memoryPlugin = {
               details: { error: "missing_param" },
             };
           } catch (err) {
-            api.logger?.warn?.(`memory-powermem: forget failed: ${String(err)}`);
+            api.logger.warn(`memory-powermem: forget failed: ${String(err)}`);
             return {
               content: [
                 {
@@ -318,14 +318,14 @@ const memoryPlugin = {
           if (results.length === 0) return;
 
           const memoryContext = results.map((r) => `- ${r.content}`).join("\n");
-          api.logger?.info?.(
+          api.logger.info(
             `memory-powermem: injecting ${results.length} memories into context`,
           );
           return {
             prependContext: `<relevant-memories>\nThe following memories may be relevant to this conversation:\n${memoryContext}\n</relevant-memories>`,
           };
         } catch (err) {
-          api.logger?.warn?.(`memory-powermem: recall failed: ${String(err)}`);
+          api.logger.warn(`memory-powermem: recall failed: ${String(err)}`);
         }
       });
     }
@@ -390,10 +390,10 @@ const memoryPlugin = {
             stored += created.length;
           }
           if (stored > 0) {
-            api.logger?.info?.(`memory-powermem: auto-captured ${stored} memories from conversation`);
+            api.logger.info(`memory-powermem: auto-captured ${stored} memories from conversation`);
           }
         } catch (err) {
-          api.logger?.warn?.(`memory-powermem: capture failed: ${String(err)}`);
+          api.logger.warn(`memory-powermem: capture failed: ${String(err)}`);
         }
       });
     }
@@ -404,20 +404,20 @@ const memoryPlugin = {
 
     api.registerService({
       id: "memory-powermem",
-      start: async () => {
+      start: async (_ctx) => {
         try {
           const h = await client.health();
-          api.logger?.info?.(
+          api.logger.info(
             `memory-powermem: initialized (${cfg.baseUrl}, health: ${h.status})`,
           );
         } catch (err) {
-          api.logger?.warn?.(
+          api.logger.warn(
             `memory-powermem: health check failed (is PowerMem server running?): ${String(err)}`,
           );
         }
       },
-      stop: () => {
-        api.logger?.info?.("memory-powermem: stopped");
+      stop: (_ctx) => {
+        api.logger.info("memory-powermem: stopped");
       },
     });
   },

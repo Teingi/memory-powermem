@@ -82,8 +82,8 @@ export const powerMemConfigSchema = {
 };
 
 /** Default user/agent IDs when not configured (single-tenant style). */
-export const DEFAULT_USER_ID = "moltbot-user";
-export const DEFAULT_AGENT_ID = "moltbot-agent";
+export const DEFAULT_USER_ID = "openclaw-user";
+export const DEFAULT_AGENT_ID = "openclaw-agent";
 
 export function resolveUserId(cfg: PowerMemConfig): string {
   return cfg.userId ?? DEFAULT_USER_ID;
