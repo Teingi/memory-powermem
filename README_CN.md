@@ -121,6 +121,14 @@ curl -s http://localhost:8000/api/v1/system/health
 
 ---
 
+## 安装方式
+
+- **一键安装（Linux/macOS）：** 见 [INSTALL.md](INSTALL.md)，使用 `install.sh`（curl 或从仓库根目录执行）。
+- **交给 OpenClaw 安装：** 将 [skills/install-powermem-memory/SKILL.md](skills/install-powermem-memory/SKILL.md) 复制到 `~/.openclaw/skills/install-powermem-memory/`，然后对 OpenClaw 说「**安装 PowerMem 记忆**」。
+- **手动安装：** 按下面步骤操作。
+
+---
+
 ## 第二步：把本插件装进 OpenClaw
 
 在**你本机**执行（路径改成你实际克隆的目录）：

@@ -121,6 +121,14 @@ JSON response means the server is up. API docs: `http://localhost:8000/docs`.
 
 ---
 
+## Install options
+
+- **One-click (Linux/macOS):** See [INSTALL.md](INSTALL.md) for `install.sh` (curl or run from repo root).
+- **Let OpenClaw install it:** Copy [skills/install-powermem-memory/SKILL.md](skills/install-powermem-memory/SKILL.md) to `~/.openclaw/skills/install-powermem-memory/`, then tell OpenClaw **「安装 PowerMem 记忆」** or **“Install PowerMem memory”**.
+- **Manual:** Steps below.
+
+---
+
 ## Step 2: Install the plugin into OpenClaw
 
 On your machine (use your actual plugin path):

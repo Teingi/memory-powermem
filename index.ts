@@ -57,13 +57,29 @@ const memoryPlugin = {
           "Search through long-term memories. Use when you need context about user preferences, past decisions, or previously discussed topics.",
         parameters: Type.Object({
           query: Type.String({ description: "Search query" }),
-          limit: Type.Optional(Type.Number({ description: "Max results (default: 5)" })),
+          limit: Type.Optional(
+            Type.Number({ description: "Max results (default: plugin recallLimit)" }),
+          ),
+          scoreThreshold: Type.Optional(
+            Type.Number({ description: "Min score 0–1 to include (default: plugin recallScoreThreshold)" }),
+          ),
         }),
         async execute(_toolCallId, params) {
-          const { query, limit = 5 } = params as { query: string; limit?: number };
+          const limit =
+            typeof (params as { limit?: number }).limit === "number"
+              ? Math.max(1, Math.min(100, Math.floor((params as { limit: number }).limit)))
+              : cfg.recallLimit ?? 5;
+          const scoreThreshold =
+            typeof (params as { scoreThreshold?: number }).scoreThreshold === "number"
+              ? Math.max(0, Math.min(1, (params as { scoreThreshold: number }).scoreThreshold))
+              : (cfg.recallScoreThreshold ?? 0);
 
           try {
-            const results = await client.search(query, limit);
+            const requestLimit = Math.min(100, Math.max(limit * 2, limit + 10));
+            const raw = await client.search(query, requestLimit);
+            const results = raw
+              .filter((r) => (r.score ?? 0) >= scoreThreshold)
+              .slice(0, limit);
 
             if (results.length === 0) {
               return {
@@ -319,8 +335,15 @@ const memoryPlugin = {
       api.on("before_agent_start", async (event) => {
         if (!event.prompt || event.prompt.length < 5) return;
 
+        const recallLimit = Math.max(1, Math.min(100, cfg.recallLimit ?? 5));
+        const scoreThreshold = Math.max(0, Math.min(1, cfg.recallScoreThreshold ?? 0));
+
         try {
-          const results = await client.search(event.prompt, 3);
+          const requestLimit = Math.min(100, Math.max(recallLimit * 2, recallLimit + 10));
+          const raw = await client.search(event.prompt, requestLimit);
+          const results = raw
+            .filter((r) => (r.score ?? 0) >= scoreThreshold)
+            .slice(0, recallLimit);
           if (results.length === 0) return;
 
           const memoryContext = results.map((r) => `- ${r.content}`).join("\n");
