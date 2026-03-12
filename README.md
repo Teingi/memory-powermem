@@ -20,7 +20,7 @@ Choose **Option A (pip)** or **Option B (Docker)**.
 
 ### Option A: Install with pip (run server locally)
 
-Best if you already have Python 3.10+.
+Best if you already have Python 3.11+.
 
 **1. Install PowerMem**
 
@@ -34,19 +34,23 @@ In **any directory** where you want to keep config (e.g. `~/powermem`):
 
 ```bash
 mkdir -p ~/powermem && cd ~/powermem
-# If you cloned PowerMem: cp /path/to/powermem/.env.example .env
-# Otherwise use the minimal .env below.
+# Copy from PowerMem repo: if you cloned it, run: cp /path/to/powermem/.env.example .env
 ```
 
-If you did not clone the PowerMem repo, create a `.env` with at least: database + LLM + Embedding. Here is a **minimal working example** (SQLite + Qwen; replace with your API key):
+If you did not clone the PowerMem repo, create a `.env` with at least: database + LLM + Embedding. Here is a **minimal working example** (OceanBase + Qwen; replace with your API key and DB credentials):
 
 ```bash
-# Create .env in ~/powermem (replace your_api_key_here)
+# Create .env in ~/powermem (replace your_api_key_here and your_password)
 cat > .env << 'EOF'
 TIMEZONE=Asia/Shanghai
-DATABASE_PROVIDER=sqlite
-SQLITE_PATH=./data/powermem_dev.db
-SQLITE_COLLECTION=memories
+DATABASE_PROVIDER=oceanbase
+
+OCEANBASE_HOST=127.0.0.1
+OCEANBASE_PORT=2881
+OCEANBASE_USER=root@sys
+OCEANBASE_PASSWORD=your_password
+OCEANBASE_DATABASE=powermem
+OCEANBASE_COLLECTION=memories
 
 LLM_PROVIDER=qwen
 LLM_API_KEY=your_api_key_here
@@ -59,7 +63,7 @@ EMBEDDING_DIMS=1536
 EOF
 ```
 
-Replace `your_api_key_here` with your Qwen API key. For OpenAI or others, see PowerMem’s [.env.example](https://github.com/oceanbase/powermem/blob/master/.env.example) for `LLM_*` and `EMBEDDING_*`.
+Replace `your_api_key_here` with your Qwen API key and `your_password` with your OceanBase password. For SQLite (simplest local setup). For OpenAI or others, see PowerMem’s [.env.example](https://github.com/oceanbase/powermem/blob/master/.env.example) for `LLM_*` and `EMBEDDING_*`.
 
 **3. Start the HTTP server**
 
@@ -101,7 +105,7 @@ Edit `.env` and set at least:
 - `LLM_API_KEY`, `LLM_PROVIDER`, `LLM_MODEL`
 - `EMBEDDING_API_KEY`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`
 
-Database can stay default (SQLite).
+Database can stay default; OceanBase is recommended (see .env.example).
 
 **2. Start the container**
 
@@ -147,7 +151,7 @@ After install, run `openclaw plugins list` and confirm `memory-powermem` is list
 
 ## Step 3: Configure OpenClaw to use the plugin
 
-Edit OpenClaw’s config (e.g. `~/.openclaw/openclaw.json). Add or merge `plugins.slots.memory` and `plugins.entries["memory-powermem"]`, and set the PowerMem URL.
+Edit OpenClaw’s config (e.g. `~/.openclaw/openclaw.json`). At the **root level**, add or merge the `plugins` section: set `plugins.slots.memory` and `plugins.entries["memory-powermem"]`, and set the PowerMem URL.
 
 **Example (JSON):**
 
@@ -225,8 +229,8 @@ If search returns the line you added (or similar), the full flow (PowerMem → p
 | `apiKey`      | No       | Set when PowerMem server has API key authentication enabled (http mode). |
 | `envFile`     | No       | CLI mode: path to PowerMem `.env` file. Optional; pmem discovers if omitted. |
 | `pmemPath`    | No       | CLI mode: path to `pmem` executable; default `pmem`. |
-| `userId`      | No       | PowerMem `user_id` for isolation; default `openclaw-user`. |
-| `agentId`     | No       | PowerMem `agent_id` for isolation; default `openclaw-agent`. |
+| `userId`      | No       | User isolation (multi-user); default `openclaw-user`. |
+| `agentId`     | No       | Agent isolation (multi-agent); default `openclaw-agent`. |
 | `autoCapture` | No       | Auto-store from conversations after agent ends; default `true`. |
 | `autoRecall`  | No       | Auto-inject relevant memories before agent starts; default `true`. |
 | `inferOnAdd`  | No       | Use PowerMem intelligent extraction when adding; default `true`. |
@@ -258,7 +262,7 @@ Exposed to OpenClaw agents:
 **1. `openclaw ltm health` fails or cannot connect**
 
 - Ensure PowerMem is running (Option A terminal still open, or Docker container up).
-- Ensure `baseUrl` matches the real address (use `http://localhost:8000` for local).
+- Ensure `baseUrl` matches the real address: use `http://localhost:8000` for local (avoid `127.0.0.1` unless you know it matches).
 - If OpenClaw and PowerMem are on different machines, use PowerMem’s host IP or hostname instead of `localhost`.
 
 **2. Add/search returns nothing or 500**
@@ -273,7 +277,7 @@ Exposed to OpenClaw agents:
 
 ---
 
-## Repository development
+## Development
 
 ```bash
 cd /path/to/openclaw-extension-powermem

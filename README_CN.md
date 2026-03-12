@@ -20,7 +20,7 @@
 
 ### 方式 A：用 pip 安装（本机跑服务）
 
-适合本机已有 Python 3.10+ 的情况。
+适合本机已有 Python 3.11+ 的情况。
 
 **1. 安装 PowerMem**
 
@@ -34,19 +34,24 @@ pip install powermem
 
 ```bash
 mkdir -p ~/powermem && cd ~/powermem
-# 从 PowerMem 官方仓库复制模板（若未克隆仓库，见下方「最小 .env 示例」）
+# 从 PowerMem 官方仓库复制模板
 # 若已克隆：cp /path/to/powermem/.env.example .env
 ```
 
-若没有克隆 PowerMem 仓库，可以直接新建 `.env`，**最少**需要配置这三类（数据库 + LLM + Embedding）。下面是一个**最小可运行示例**（SQLite + 通义千问，请换成你自己的 API Key）：
+若没有克隆 PowerMem 仓库，可以直接新建 `.env`，**最少**需要配置这三类（数据库 + LLM + Embedding）。下面是一个**最小可运行示例**seekdb/oceanbase + 通义千问，请换成你自己的 API Key）：
 
 ```bash
 # 在 ~/powermem 目录下创建 .env，内容示例（请替换 your_api_key_here）
 cat > .env << 'EOF'
 TIMEZONE=Asia/Shanghai
-DATABASE_PROVIDER=sqlite
-SQLITE_PATH=./data/powermem_dev.db
-SQLITE_COLLECTION=memories
+DATABASE_PROVIDER=oceanbase
+
+OCEANBASE_HOST=127.0.0.1
+OCEANBASE_PORT=2881
+OCEANBASE_USER=root@sys
+OCEANBASE_PASSWORD=your_password
+OCEANBASE_DATABASE=powermem
+OCEANBASE_COLLECTION=memories
 
 LLM_PROVIDER=qwen
 LLM_API_KEY=your_api_key_here
@@ -101,7 +106,7 @@ cp .env.example .env
 - `LLM_API_KEY`、`LLM_PROVIDER`、`LLM_MODEL`
 - `EMBEDDING_API_KEY`、`EMBEDDING_PROVIDER`、`EMBEDDING_MODEL`
 
-数据库可保持默认（SQLite），无需改。
+数据库推荐使用（oceanbase）。
 
 **2. 启动容器**
 
