@@ -8,7 +8,11 @@
  */
 
 import { Type } from "@sinclair/typebox";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/memory-core";
+import type {
+  OpenClawPluginApi,
+  OpenClawPluginCliContext,
+} from "openclaw/plugin-sdk/memory-core";
+import type { OpenClawPluginServiceContext } from "openclaw/plugin-sdk";
 
 import {
   powerMemConfigSchema,
@@ -64,7 +68,7 @@ const memoryPlugin = {
             Type.Number({ description: "Min score 0–1 to include (default: plugin recallScoreThreshold)" }),
           ),
         }),
-        async execute(_toolCallId, params) {
+        async execute(_toolCallId: string, params: Record<string, unknown>) {
           const limit =
             typeof (params as { limit?: number }).limit === "number"
               ? Math.max(1, Math.min(100, Math.floor((params as { limit: number }).limit)))
@@ -73,6 +77,7 @@ const memoryPlugin = {
             typeof (params as { scoreThreshold?: number }).scoreThreshold === "number"
               ? Math.max(0, Math.min(1, (params as { scoreThreshold: number }).scoreThreshold))
               : (cfg.recallScoreThreshold ?? 0);
+          const query = String((params as { query?: string }).query ?? "");
 
           try {
             const requestLimit = Math.min(100, Math.max(limit * 2, limit + 10));
@@ -136,7 +141,7 @@ const memoryPlugin = {
             Type.Number({ description: "Importance 0-1 (default: 0.7)" }),
           ),
         }),
-        async execute(_toolCallId, params) {
+        async execute(_toolCallId: string, params: Record<string, unknown>) {
           const { text, importance = 0.7 } = params as {
             text: string;
             importance?: number;
@@ -195,7 +200,7 @@ const memoryPlugin = {
           query: Type.Optional(Type.String({ description: "Search to find memory" })),
           memoryId: Type.Optional(Type.String({ description: "Specific memory ID" })),
         }),
-        async execute(_toolCallId, params) {
+        async execute(_toolCallId: string, params: Record<string, unknown>) {
           const { query, memoryId } = params as { query?: string; memoryId?: string };
 
           try {
@@ -277,7 +282,7 @@ const memoryPlugin = {
     // ========================================================================
 
     api.registerCli(
-      ({ program }) => {
+      ({ program }: OpenClawPluginCliContext) => {
         const ltm = program
           .command("ltm")
           .description("PowerMem long-term memory plugin commands");
@@ -287,7 +292,9 @@ const memoryPlugin = {
           .description("Search memories")
           .argument("<query>", "Search query")
           .option("--limit <n>", "Max results", "5")
-          .action(async (query: string, opts: { limit?: string }) => {
+          .action(async (...args: unknown[]) => {
+            const query = String(args[0] ?? "");
+            const opts = (args[1] ?? {}) as { limit?: string };
             const limit = parseInt(opts.limit ?? "5", 10);
             const results = await client.search(query, limit);
             console.log(JSON.stringify(results, null, 2));
@@ -310,7 +317,8 @@ const memoryPlugin = {
           .command("add")
           .description("Manually add a memory (for testing or one-off storage)")
           .argument("<text>", "Content to store")
-          .action(async (text: string) => {
+          .action(async (...args: unknown[]) => {
+            const text = String(args[0] ?? "");
             try {
               const created = await client.add(text.trim(), { infer: cfg.inferOnAdd });
               if (created.length === 0) {
@@ -332,15 +340,16 @@ const memoryPlugin = {
     // ========================================================================
 
     if (cfg.autoRecall) {
-      api.on("before_agent_start", async (event) => {
-        if (!event.prompt || event.prompt.length < 5) return;
+      api.on("before_agent_start", async (event: unknown) => {
+        const e = event as { prompt: string; messages?: unknown[] };
+        if (!e.prompt || e.prompt.length < 5) return;
 
         const recallLimit = Math.max(1, Math.min(100, cfg.recallLimit ?? 5));
         const scoreThreshold = Math.max(0, Math.min(1, cfg.recallScoreThreshold ?? 0));
 
         try {
           const requestLimit = Math.min(100, Math.max(recallLimit * 2, recallLimit + 10));
-          const raw = await client.search(event.prompt, requestLimit);
+          const raw = await client.search(e.prompt, requestLimit);
           const results = raw
             .filter((r) => (r.score ?? 0) >= scoreThreshold)
             .slice(0, recallLimit);
@@ -360,14 +369,15 @@ const memoryPlugin = {
     }
 
     if (cfg.autoCapture) {
-      api.on("agent_end", async (event) => {
-        if (!event.success || !event.messages || event.messages.length === 0) {
+      api.on("agent_end", async (event: unknown) => {
+        const e = event as { messages: unknown[]; success: boolean; error?: string };
+        if (!e.success || !e.messages || e.messages.length === 0) {
           return;
         }
 
         try {
           const texts: string[] = [];
-          for (const msg of event.messages) {
+          for (const msg of e.messages) {
             if (!msg || typeof msg !== "object") continue;
             const msgObj = msg as Record<string, unknown>;
             const role = msgObj.role;
@@ -433,7 +443,7 @@ const memoryPlugin = {
 
     api.registerService({
       id: "memory-powermem",
-      start: async (_ctx) => {
+      start: async (_ctx: OpenClawPluginServiceContext) => {
         try {
           const h = await client.health();
           const where = cfg.mode === "cli" ? `cli ${cfg.pmemPath ?? "pmem"}` : cfg.baseUrl;
@@ -450,7 +460,7 @@ const memoryPlugin = {
           );
         }
       },
-      stop: (_ctx) => {
+      stop: (_ctx: OpenClawPluginServiceContext) => {
         api.logger.info("memory-powermem: stopped");
       },
     });

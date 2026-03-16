@@ -4,8 +4,14 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
   # Manual trigger for dev: lint, test, and package only; no GitHub Release or npm publish
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag, or PR ref (e.g. refs/pull/123/merge). Leave empty to run on default branch.'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -17,6 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js

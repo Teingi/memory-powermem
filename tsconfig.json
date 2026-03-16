@@ -11,6 +11,6 @@
     "isolatedModules": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["*.ts", "*.test.ts"],
+  "include": ["*.ts", "openclaw-plugin-sdk.d.ts", "test/**/*.ts"],
   "exclude": ["node_modules"]
 }
