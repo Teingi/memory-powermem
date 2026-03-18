@@ -49,7 +49,7 @@ jobs:
             PKG_VER="dev-$(date +%Y%m%d)-${GITHUB_SHA::7}"
           fi
           mkdir -p release
-          git archive --format=zip --prefix=openclaw-extension-powermem/ HEAD -o release/openclaw-extension-powermem-$PKG_VER.zip
+          git archive --format=zip --prefix=memory-powermem/ HEAD -o release/memory-powermem-$PKG_VER.zip
 
       # Create GitHub Release only when run on a tag
       - name: Create GitHub Release
