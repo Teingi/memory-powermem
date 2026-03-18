@@ -147,12 +147,17 @@ curl -s http://localhost:8000/api/v1/system/health
 在**你本机**执行（路径改成你实际克隆的目录）：
 
 ```bash
+# 从 npm 安装（推荐给终端用户；会从 npm 官方源自动下载并安装）
+openclaw plugins install openclaw-extension-powermem
+
 # 若插件在本机目录（例如克隆下来的）
 openclaw plugins install /path/to/openclaw-extension-powermem
 
 # 开发时想改代码即生效，可用链接方式（不拷贝）
 openclaw plugins install -l /path/to/openclaw-extension-powermem
 ```
+
+**说明：** 在某个 Node 项目里执行 `npm i openclaw-extension-powermem` 只会把包装进该项目的 `node_modules`，**不会**在 OpenClaw 里注册插件。若要在 OpenClaw 里使用本插件，必须执行 `openclaw plugins install openclaw-extension-powermem`（或按上面用本地路径安装），再在 OpenClaw 中配置并重启 gateway。
 
 安装成功后，可用 `openclaw plugins list` 确认能看到 `memory-powermem`。
 
@@ -283,6 +288,15 @@ openclaw ltm search "咖啡"
 
 - 确认配置里 `plugins.slots.memory` 为 `memory-powermem`，且 `plugins.entries["memory-powermem"].enabled` 为 `true`。
 - 改完配置后必须重启 gateway（或 OpenClaw 应用）。
+
+**4. 不主动说「从 PowerMem 查」Agent 就不查记忆**
+
+- 开启 `autoRecall: true` 后，插件会注入系统级指引，告诉 Agent 在回答与过去、偏好、人物相关的问题时先使用 `memory_recall` 或本轮已注入的 `<relevant-memories>`。请确认未把 `autoRecall` 设为 `false`。
+- 自动回忆在每轮开始前用当前用户消息（若 prompt 过短则用上一条用户消息）做检索。若仍出现不查就回复的情况，可先显式说一句「查一下记忆里关于……」确认流程正常；并确认 /new 后的 Web 会话走的是同一 gateway 与插件。
+
+**5. Agent 尝试读取 `memory/YYYY-MM-DD.md` 并报 ENOENT**
+
+- OpenClaw 自带的 **session-memory** hook 会把会话摘要写到工作区的 `memory/YYYY-MM-DD-slug.md`。使用 PowerMem 作为记忆槽时，Agent 仍可能被工作区文档或模型推断引导去读这些文件，导致 `read` 报错。建议禁用该 hook，只使用 PowerMem：执行 `openclaw hooks disable session-memory`，或在 `~/.openclaw/openclaw.json` 里将 `hooks.internal.entries["session-memory"].enabled` 设为 `false`。修改配置后需重启 gateway。
 
 ---
 

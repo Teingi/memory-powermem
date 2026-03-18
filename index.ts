@@ -339,31 +339,77 @@ const memoryPlugin = {
     // Lifecycle Hooks
     // ========================================================================
 
+    const MEMORY_RECALL_GUIDANCE =
+      "## Long-term memory (PowerMem)\n" +
+      "When answering about past events, user preferences, people, or anything the user may have told you before: use the memory_recall tool to search long-term memory first, or use any <relevant-memories> already injected in this turn.\n";
+
+    function lastUserMessageText(messages: unknown[] | undefined): string {
+      if (!Array.isArray(messages) || messages.length === 0) return "";
+      for (let i = messages.length - 1; i >= 0; i--) {
+        const msg = messages[i];
+        if (!msg || typeof msg !== "object") continue;
+        const role = (msg as Record<string, unknown>).role;
+        if (role !== "user") continue;
+        const content = (msg as Record<string, unknown>).content;
+        if (typeof content === "string" && content.trim().length >= 5) return content.trim();
+        if (Array.isArray(content)) {
+          for (const block of content) {
+            if (
+              block &&
+              typeof block === "object" &&
+              (block as Record<string, unknown>).type === "text" &&
+              typeof (block as Record<string, unknown>).text === "string"
+            ) {
+              const t = String((block as Record<string, unknown>).text).trim();
+              if (t.length >= 5) return t;
+            }
+          }
+        }
+      }
+      return "";
+    }
+
     if (cfg.autoRecall) {
       api.on("before_agent_start", async (event: unknown) => {
         const e = event as { prompt: string; messages?: unknown[] };
-        if (!e.prompt || e.prompt.length < 5) return;
+        const query =
+          (typeof e.prompt === "string" && e.prompt.trim().length >= 5
+            ? e.prompt.trim()
+            : lastUserMessageText(e.messages)) || "";
+        if (query.length < 5) {
+          return { prependSystemContext: MEMORY_RECALL_GUIDANCE };
+        }
 
         const recallLimit = Math.max(1, Math.min(100, cfg.recallLimit ?? 5));
         const scoreThreshold = Math.max(0, Math.min(1, cfg.recallScoreThreshold ?? 0));
 
         try {
           const requestLimit = Math.min(100, Math.max(recallLimit * 2, recallLimit + 10));
-          const raw = await client.search(e.prompt, requestLimit);
+          const raw = await client.search(query, requestLimit);
           const results = raw
             .filter((r) => (r.score ?? 0) >= scoreThreshold)
             .slice(0, recallLimit);
-          if (results.length === 0) return;
 
-          const memoryContext = results.map((r) => `- ${r.content}`).join("\n");
-          api.logger.info(
-            `memory-powermem: injecting ${results.length} memories into context`,
-          );
+          const memoryContext =
+            results.length > 0
+              ? results.map((r) => `- ${r.content}`).join("\n")
+              : "";
+          if (results.length > 0) {
+            api.logger.info(
+              `memory-powermem: injecting ${results.length} memories into context`,
+            );
+          }
           return {
-            prependContext: `<relevant-memories>\nThe following memories may be relevant to this conversation:\n${memoryContext}\n</relevant-memories>`,
+            prependSystemContext: MEMORY_RECALL_GUIDANCE,
+            ...(memoryContext
+              ? {
+                  prependContext: `<relevant-memories>\nThe following memories may be relevant to this conversation:\n${memoryContext}\n</relevant-memories>`,
+                }
+              : {}),
           };
         } catch (err) {
           api.logger.warn(`memory-powermem: recall failed: ${String(err)}`);
+          return { prependSystemContext: MEMORY_RECALL_GUIDANCE };
         }
       });
     }

@@ -146,12 +146,17 @@ JSON response means the server is up. API docs: `http://localhost:8000/docs`.
 On your machine (use your actual plugin path):
 
 ```bash
+# Install from npm (recommended for end users; OpenClaw downloads the package from the npm registry)
+openclaw plugins install openclaw-extension-powermem
+
 # Install from a local directory (e.g. cloned repo)
 openclaw plugins install /path/to/openclaw-extension-powermem
 
 # For development (symlink, no copy)
 openclaw plugins install -l /path/to/openclaw-extension-powermem
 ```
+
+**Note:** Running `npm i openclaw-extension-powermem` in a Node project only adds the package to that project’s `node_modules`; it does **not** register the plugin with OpenClaw. To use this as an OpenClaw plugin, you must run `openclaw plugins install openclaw-extension-powermem` (or install from a path as above), then configure OpenClaw and restart the gateway.
 
 After install, run `openclaw plugins list` and confirm `memory-powermem` is listed.
 
@@ -282,6 +287,15 @@ Exposed to OpenClaw agents:
 
 - Confirm `plugins.slots.memory` is `memory-powermem` and `plugins.entries["memory-powermem"].enabled` is `true`.
 - Restart the gateway (or OpenClaw app) after config changes.
+
+**4. Agent does not search memory until I ask it to**
+
+- With `autoRecall: true`, the plugin injects system guidance so the agent is told to use `memory_recall` (or injected `<relevant-memories>`) when answering about past events, preferences, or people. Ensure `autoRecall` is not set to `false`.
+- Auto-recall runs before each turn using the current user message (or the last user message if the prompt is very short). If you still see the agent answering without checking memory, try being explicit once (e.g. "check your memory for …") and ensure the run uses the plugin (e.g. web UI after `/new` uses the same gateway and plugin).
+
+**5. Agent tries to read `memory/YYYY-MM-DD.md` and gets ENOENT**
+
+- OpenClaw's built-in **session-memory** hook writes session snapshots to workspace `memory/YYYY-MM-DD-slug.md`. When you use PowerMem as the memory slot, the agent may still be told (by workspace docs or inference) to load those files, causing failed `read` calls. Disable the hook so only PowerMem is used: run `openclaw hooks disable session-memory`, or set `hooks.internal.entries["session-memory"].enabled` to `false` in `~/.openclaw/openclaw.json`. Restart the gateway after changing config.
 
 ---
 
