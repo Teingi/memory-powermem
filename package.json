@@ -1,5 +1,5 @@
 {
-  "name": "openclaw-extension-powermem",
+  "name": "memory-powermem",
   "version": "1.0.0",
   "description": "OpenClaw plugin: long-term memory via PowerMem (HTTP or local CLI; intelligent extraction, Ebbinghaus forgetting curve).",
   "type": "module",

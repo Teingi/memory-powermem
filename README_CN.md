@@ -148,16 +148,16 @@ curl -s http://localhost:8000/api/v1/system/health
 
 ```bash
 # 从 npm 安装（推荐给终端用户；会从 npm 官方源自动下载并安装）
-openclaw plugins install openclaw-extension-powermem
+openclaw plugins install memory-powermem
 
 # 若插件在本机目录（例如克隆下来的）
-openclaw plugins install /path/to/openclaw-extension-powermem
+openclaw plugins install /path/to/memory-powermem
 
 # 开发时想改代码即生效，可用链接方式（不拷贝）
-openclaw plugins install -l /path/to/openclaw-extension-powermem
+openclaw plugins install -l /path/to/memory-powermem
 ```
 
-**说明：** 在某个 Node 项目里执行 `npm i openclaw-extension-powermem` 只会把包装进该项目的 `node_modules`，**不会**在 OpenClaw 里注册插件。若要在 OpenClaw 里使用本插件，必须执行 `openclaw plugins install openclaw-extension-powermem`（或按上面用本地路径安装），再重启 gateway。
+**说明：** 在某个 Node 项目里执行 `npm i memory-powermem` 只会把包装进该项目的 `node_modules`，**不会**在 OpenClaw 里注册插件。若要在 OpenClaw 里使用本插件，必须执行 `openclaw plugins install memory-powermem`（或按上面用本地路径安装），再重启 gateway。
 
 安装成功后，可用 `openclaw plugins list` 确认能看到 `memory-powermem`。未在配置中书写本插件 config 时，插件会使用 **默认配置**：`baseUrl: "http://localhost:8000"`，并开启 `autoCapture`、`autoRecall`、`inferOnAdd`，因此典型情况（PowerMem 跑在 localhost:8000）下无需编辑 `~/.openclaw/openclaw.json`。
 
@@ -321,7 +321,7 @@ openclaw ltm search "咖啡"
 ## 本仓库开发命令
 
 ```bash
-cd /path/to/openclaw-extension-powermem
+cd /path/to/memory-powermem
 pnpm install
 pnpm lint   # 类型检查
 pnpm test   # 运行测试（若有）

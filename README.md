@@ -147,16 +147,16 @@ On your machine (use your actual plugin path):
 
 ```bash
 # Install from npm (recommended for end users; OpenClaw downloads the package from the npm registry)
-openclaw plugins install openclaw-extension-powermem
+openclaw plugins install memory-powermem
 
 # Install from a local directory (e.g. cloned repo)
-openclaw plugins install /path/to/openclaw-extension-powermem
+openclaw plugins install /path/to/memory-powermem
 
 # For development (symlink, no copy)
-openclaw plugins install -l /path/to/openclaw-extension-powermem
+openclaw plugins install -l /path/to/memory-powermem
 ```
 
-**Note:** Running `npm i openclaw-extension-powermem` in a Node project only adds the package to that project’s `node_modules`; it does **not** register the plugin with OpenClaw. To use this as an OpenClaw plugin, you must run `openclaw plugins install openclaw-extension-powermem` (or install from a path as above), then restart the gateway.
+**Note:** Running `npm i memory-powermem` in a Node project only adds the package to that project’s `node_modules`; it does **not** register the plugin with OpenClaw. To use this as an OpenClaw plugin, you must run `openclaw plugins install memory-powermem` (or install from a path as above), then restart the gateway.
 
 After install, run `openclaw plugins list` and confirm `memory-powermem` is listed. The plugin uses **default config** when none is set: `baseUrl: "http://localhost:8000"`, `autoCapture`, `autoRecall`, and `inferOnAdd` enabled — so you do not need to edit `~/.openclaw/openclaw.json` for the typical setup (PowerMem on localhost:8000).
 
@@ -320,7 +320,7 @@ Exposed to OpenClaw agents:
 ## Development
 
 ```bash
-cd /path/to/openclaw-extension-powermem
+cd /path/to/memory-powermem
 pnpm install
 pnpm lint   # type-check
 pnpm test   # run tests (if any)

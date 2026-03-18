@@ -2,12 +2,12 @@
 #
 # OpenClaw + PowerMem memory plugin installer
 # Usage (from GitHub):
-#   curl -fsSL https://raw.githubusercontent.com/ob-labs/openclaw-extension-powermem/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash
 # Or from repo root:
 #   bash install.sh [ -y ] [ --workdir PATH ]
 #
 # Env:
-#   REPO=owner/repo     - GitHub repo for download (default: ob-labs/openclaw-extension-powermem)
+#   REPO=owner/repo     - GitHub repo for download (default: ob-labs/memory-powermem)
 #   BRANCH=branch       - Branch/tag (default: main)
 #   INSTALL_YES=1       - Non-interactive (same as -y)
 #   SKIP_OPENCLAW=1     - Skip openclaw presence check
@@ -15,7 +15,7 @@
 
 set -e
 
-REPO="${REPO:-ob-labs/openclaw-extension-powermem}"
+REPO="${REPO:-ob-labs/memory-powermem}"
 BRANCH="${BRANCH:-main}"
 INSTALL_YES="${INSTALL_YES:-0}"
 SKIP_OC="${SKIP_OPENCLAW:-0}"
@@ -176,8 +176,8 @@ deploy_from_repo() {
 }
 
 deploy_from_github() {
-  # REPO defaults to ob-labs/openclaw-extension-powermem
-  [[ -n "$REPO" ]] || REPO="ob-labs/openclaw-extension-powermem"
+  # REPO defaults to ob-labs/memory-powermem
+  [[ -n "$REPO" ]] || REPO="ob-labs/memory-powermem"
   local gh_raw="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
   local files=(
     "index.ts"

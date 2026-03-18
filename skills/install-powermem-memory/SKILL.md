@@ -37,11 +37,11 @@ This skill folder includes supplementary docs to reference when needed:
 3. **Install the plugin**  
    If the user has the repo path:
    ```bash
-   openclaw plugins install /path/to/openclaw-extension-powermem
+   openclaw plugins install /path/to/memory-powermem
    ```
    Or from GitHub one-liner:
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/ob-labs/openclaw-extension-powermem/main/install.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash
    ```
 
 4. **Configure OpenClaw**  

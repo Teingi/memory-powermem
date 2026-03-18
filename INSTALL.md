@@ -9,20 +9,20 @@ Give [OpenClaw](https://github.com/openclaw/openclaw) long-term memory via [Powe
 **Prerequisites:** OpenClaw installed (`openclaw --version`). PowerMem is **not** installed by this script—you either run a PowerMem server yourself (HTTP mode) or use the `pmem` CLI (CLI mode). The script only deploys the plugin and configures OpenClaw.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ob-labs/openclaw-extension-powermem/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash
 ```
 
 Or run from the repo root (no download):
 
 ```bash
-cd /path/to/openclaw-extension-powermem
+cd /path/to/memory-powermem
 bash install.sh
 ```
 
 Non-interactive (defaults: HTTP mode, baseUrl http://localhost:8000):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ob-labs/openclaw-extension-powermem/main/install.sh | bash -s -y
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash -s -y
 ```
 
 Install to a specific OpenClaw instance:
@@ -45,7 +45,7 @@ Copy the skill file into OpenClaw’s skill directory, then ask OpenClaw to do t
 
 ```bash
 mkdir -p ~/.openclaw/skills/install-powermem-memory
-cp /path/to/openclaw-extension-powermem/skills/install-powermem-memory/SKILL.md \
+cp /path/to/memory-powermem/skills/install-powermem-memory/SKILL.md \
    ~/.openclaw/skills/install-powermem-memory/
 ```
 
@@ -53,7 +53,7 @@ cp /path/to/openclaw-extension-powermem/skills/install-powermem-memory/SKILL.md 
 
 ```powershell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.openclaw\skills\install-powermem-memory"
-Copy-Item "path\to\openclaw-extension-powermem\skills\install-powermem-memory\SKILL.md" `
+Copy-Item "path\to\memory-powermem\skills\install-powermem-memory\SKILL.md" `
   "$env:USERPROFILE\.openclaw\skills\install-powermem-memory\"
 ```
 
@@ -92,9 +92,9 @@ Verify: `curl -s http://localhost:8000/api/v1/system/health`
 ### 2. Install the plugin into OpenClaw
 
 ```bash
-openclaw plugins install /path/to/openclaw-extension-powermem
+openclaw plugins install /path/to/memory-powermem
 # Or symlink for development:
-openclaw plugins install -l /path/to/openclaw-extension-powermem
+openclaw plugins install -l /path/to/memory-powermem
 ```
 
 Confirm: `openclaw plugins list` shows `memory-powermem`.

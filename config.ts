@@ -151,7 +151,7 @@ export const DEFAULT_AGENT_ID = "openclaw-agent";
 
 /**
  * Default plugin config when openclaw.json has no plugins.entries["memory-powermem"].config.
- * Allows "openclaw plugins install openclaw-extension-powermem" to work without manual config.
+ * Allows "openclaw plugins install memory-powermem" to work without manual config.
  */
 export const DEFAULT_PLUGIN_CONFIG: PowerMemConfig = {
   mode: "http",
