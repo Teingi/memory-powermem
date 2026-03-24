@@ -1,6 +1,6 @@
 ---
-name: install-powermem-memory-minimal
-description: memory-powermem 最小安装步骤（OpenClaw + PowerMem 长期记忆），面向个人用户；无需单独配置 powermem.env，复用 OpenClaw 里已配好的对话模型。本 skill 可独立分发，不依赖其他安装类 skill。
+name: install-memory-powermem
+description: OpenClaw skill「快速安装」路径（skill id 与目录名均为 install-memory-powermem）：memory-powermem + PowerMem 最少步骤，面向个人用户；无需单独配置 powermem.env，复用 OpenClaw 里已配好的对话模型。可独立分发；完整选项、工具说明与排错见 install-memory-powermem-full。
 triggers:
   - "PowerMem 快速安装"
   - "PowerMem 最简单安装"
@@ -12,10 +12,12 @@ triggers:
   - "PowerMem quickstart"
   - "Easiest PowerMem setup"
   - "Minimal install memory-powermem"
-  - "Install powermem memory minimal"
+  - "Install memory powermem minimal"
 ---
 
-# PowerMem 记忆 · 极简安装（个人用户）
+# PowerMem 记忆 · 快速安装（个人用户）
+
+本 skill 在 OpenClaw 中的标识与建议目录名为 **`install-memory-powermem`**。若需要 HTTP/多实例、工具表与详细排错，请改用 **`install-memory-powermem-full`**（仓库内 `skills/install-memory-powermem-full/`，需一并拷贝该目录下全部 `.md`）。
 
 你只要记住几件事：**OpenClaw 能正常聊天**、**Python 先确认 ≥ 3.10**、**本机装好 PowerMem**、**装上插件**。不用手写 `powermem.env`，记忆用的模型和 Key 会跟你在 OpenClaw 里配的一样。
 
@@ -52,11 +54,12 @@ triggers:
    - 在插件配置里把 **`pmemPath`** 写成 venv 里 `pmem` 的**完整路径**（装完后可用 `which pmem` 查看）。
 
 5. **一键装插件（推荐）**  
-   在 **Mac / Linux** 上执行（需已安装 OpenClaw）：
+   在 **Mac / Linux** 上执行（需已安装 OpenClaw）。脚本**不会**替你执行 `pip install powermem`；装插件前仍需完成上面的 PowerMem 与 `pmem` 步骤。
    ```bash
    curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash -s -y
    ```
-   脚本会把插件放进 OpenClaw，并打开「用 OpenClaw 的模型驱动记忆」等默认选项。
+   已克隆本仓库时，也可在仓库根目录执行：`bash install.sh`（可加 `-y`、或 `bash -s -- --workdir ~/.openclaw-second` 指定另一套 OpenClaw 数据目录）。  
+   脚本会把插件放进 OpenClaw，并打开「用 OpenClaw 的模型驱动记忆」等默认选项；带 `-y` 时仍可能生成可选模板 **`~/.openclaw/powermem/powermem.env`**（默认路径下通常不必手改）。
 
 6. **重启网关并检查**  
    ```bash
@@ -88,7 +91,7 @@ triggers:
 | `pmem` 找不到 | 激活 venv，或配置 **`pmemPath`** 为绝对路径。 |
 | `plugins list` 没有 **memory-powermem**，或状态不是 **loaded** | 确认已执行安装脚本或 `openclaw plugins install`；`plugins.enabled` 为 true、`plugins.slots.memory` 为 **memory-powermem**；改完后**重启 gateway**，再执行 `openclaw plugins list` 复查。 |
 | `ltm health` 不健康 | 确认 OpenClaw 里**默认模型**和 API Key 本身能聊天；升级 OpenClaw 到较新版本后再试。 |
-| 想要更多选项（多实例、HTTP、自建服务器等） | 查阅 **[memory-powermem](https://github.com/ob-labs/memory-powermem)** 仓库根目录的 **INSTALL.md** 与 **README**。 |
+| 想要更多选项（多实例、HTTP、`install.sh` 细节、工具与排错表等） | 使用 **`install-memory-powermem-full`** skill（含 **config-reference.md**），或查阅 **[memory-powermem](https://github.com/ob-labs/memory-powermem)** 的 **README**。 |
 
 ---
 

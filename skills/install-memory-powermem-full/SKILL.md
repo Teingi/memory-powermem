@@ -1,6 +1,6 @@
 ---
-name: install-powermem-memory
-description: Step-by-step guide to install and configure the PowerMem long-term memory plugin (full path, options, troubleshooting). After setup, the plugin auto-captures conversation highlights and auto-recalls relevant memories. This skill is self-contained and can be published independently of any minimal-install skill.
+name: install-memory-powermem-full
+description: OpenClaw full guide skill (id and folder name install-memory-powermem-full). Step-by-step install and configuration for the PowerMem long-term memory plugin—options, tools, troubleshooting—and bundled reference docs. Complements the quickstart skill install-memory-powermem; either can be used alone.
 triggers:
   - "安装 PowerMem 记忆"
   - "安装 PowerMem 记忆插件"
@@ -13,7 +13,9 @@ triggers:
   - "What is PowerMem"
 ---
 
-# PowerMem Memory Guide
+# PowerMem Memory — Full Guide
+
+**Skill id / OpenClaw folder name:** `install-memory-powermem-full`. For the shortest install-only path, use **`install-memory-powermem`** (quickstart).
 
 This skill folder includes supplementary docs:
 
@@ -55,11 +57,11 @@ The curl **`install.sh`** deploys the plugin and OpenClaw entries; with **`-y`**
    - Check: `curl -s http://localhost:8000/api/v1/system/health`.
 
 5. **Install the plugin**  
-   `openclaw plugins install /path/to/memory-powermem`, or **`install.sh`** from [INSTALL.md](https://github.com/ob-labs/memory-powermem/blob/main/INSTALL.md).
+   `openclaw plugins install /path/to/memory-powermem` (or `openclaw plugins install memory-powermem` from npm), or run **`install.sh`** from the [memory-powermem](https://github.com/ob-labs/memory-powermem) repo — see **One-click plugin deploy (`install.sh`)** below for curl / flags / `--workdir`.
 
 6. **Configure OpenClaw**  
 
-   **CLI — minimal (recommended, matches plugin defaults):**  
+   **CLI — defaults (recommended, matches plugin defaults):**  
    Do **not** set `envFile` unless you need a file. Example:
 
    ```bash
@@ -104,6 +106,84 @@ The curl **`install.sh`** deploys the plugin and OpenClaw entries; with **`-y`**
    openclaw ltm add "I prefer coffee in the morning"
    openclaw ltm search "coffee"
    ```
+
+## One-click plugin deploy (`install.sh`)
+
+**Requires:** OpenClaw installed (`openclaw --version`). The script does **not** run `pip install powermem`; ensure **`pmem`** is on PATH when the gateway runs or set **`pmemPath`**.
+
+**Default:** configures plugin **CLI** mode. With **`-y`**, it may still create **`~/.openclaw/powermem/powermem.env`** as an optional template — not required if you use OpenClaw-injected LLM + default SQLite.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash
+```
+
+From a local clone (no download):
+
+```bash
+cd /path/to/memory-powermem && bash install.sh
+```
+
+Non-interactive (defaults: CLI, may seed env file):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash -s -y
+```
+
+Target a different OpenClaw instance:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash -s -- --workdir ~/.openclaw-second
+```
+
+**What the script does:** resolve OpenClaw workdir → choose or default **cli** / **http** and paths → for CLI, optionally seed `powermem.env` if missing → deploy plugin to `<workdir>/extensions/memory-powermem` → `npm install` there → set OpenClaw config (`plugins.enabled`, `slots.memory`, `entries.memory-powermem`).
+
+**After (CLI):** `openclaw gateway`, then `openclaw ltm health` — you usually **do not** need to edit `powermem.env` when using plugin defaults.
+
+**After (HTTP):** start PowerMem with a proper `.env` in the server cwd, then start the gateway.
+
+## Copy a skill into OpenClaw
+
+Copy **one** skill you want into `~/.openclaw/skills/<skill-name>/` (folder name should match the skill id). The quickstart and full-guide skills are **independent**.
+
+**Quickstart (`install-memory-powermem`) — Linux / macOS:**
+
+```bash
+mkdir -p ~/.openclaw/skills/install-memory-powermem
+cp /path/to/memory-powermem/skills/install-memory-powermem/SKILL.md \
+   ~/.openclaw/skills/install-memory-powermem/
+```
+
+**Full guide (`install-memory-powermem-full`) — Linux / macOS:** copy **all** `.md` files in that folder.
+
+```bash
+mkdir -p ~/.openclaw/skills/install-memory-powermem-full
+cp /path/to/memory-powermem/skills/install-memory-powermem-full/*.md \
+   ~/.openclaw/skills/install-memory-powermem-full/
+```
+
+**Full guide — Windows (PowerShell):**
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.openclaw\skills\install-memory-powermem-full"
+Copy-Item "path\to\memory-powermem\skills\install-memory-powermem-full\*.md" `
+  "$env:USERPROFILE\.openclaw\skills\install-memory-powermem-full\"
+```
+
+## Multi-instance OpenClaw (`--workdir` / `OPENCLAW_STATE_DIR`)
+
+**Install script:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ob-labs/memory-powermem/main/install.sh | bash -s -- --workdir ~/.openclaw-second
+```
+
+**Manual config** for that instance:
+
+```bash
+OPENCLAW_STATE_DIR=~/.openclaw-second openclaw config set plugins.slots.memory memory-powermem
+```
+
+Plugin data and default SQLite follow **that** instance’s `stateDir`.
 
 ## Available Tools
 
@@ -154,3 +234,4 @@ Restart the gateway after slot or plugin config changes.
 | **Wrong SQLite file / instance** | Data is under **that OpenClaw instance’s `stateDir`** (`OPENCLAW_STATE_DIR` / `--workdir`). |
 | **HTTP mode** | Server running, **`baseUrl`** correct, **`apiKey`** if enabled. |
 | **`openclaw plugins list`**: no `memory-powermem`, or status is not **loaded** | Re-run plugin install; set `plugins.enabled` true and `plugins.slots.memory` = `memory-powermem`; restart **gateway**; run `openclaw plugins list` again until **memory-powermem** shows **loaded**. |
+| **Add/search returns 500 or empty** | Check PowerMem / gateway logs; often missing or mismatched **`LLM_*` / `EMBEDDING_*`** in **`envFile`** when **`useOpenClawModel`** is false or overrides are incomplete. |
